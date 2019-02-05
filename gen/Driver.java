@@ -8,6 +8,18 @@ import java.util.ArrayList;
 import java.util.Collection;
 
 
+public class TerminalListener extends MicroBaseListener {
+    private Queue<String> tokens = new Queue<>();
+    private Queue<String> values = new Queue<>();
+
+    @ovreride
+    public void visitTerminal(TerminalNode node){
+        values.push(node.getText());
+        tokens.push(node.getSymbol().getText());
+
+    }
+}
+
 public static void main(String[] args){
 
         for(String s:args){
@@ -19,12 +31,10 @@ public static void main(String[] args){
             MicroParser parser = new MicroParser(tokens);
             ParseTree tree = parser.compilationUnit();
             ParseTreeWalker walker = new ParseTreeWalker();
+            TerminalListener listener = new TerminalListener();
+            walker.walk(listener, tree);
         }
     }
-    public class TerminalListener extends MicroBaseListener{
-        private List<String> tokens = new ArrayList<>();
 
-        @ovreride
-        public void
-    }
+
 
