@@ -6,7 +6,10 @@ import org.antlr.v4.runtime.misc.NotNull;
 
 import java.util.Queue;
 
-
+//Terminal Listenre class ovrerides the base lsitener class
+//This class object is used when traversing the parse tree
+// We have ovreridden the "On visiting treminal" so that the class
+// maintains a list of the non-termnial tokens it's seen and their values.
 public class TerminalListener extends MicroBaseListener {
     private Queue<String> tokens = new Queue<>();
     private Queue<String> values = new Queue<>();
@@ -17,7 +20,7 @@ public class TerminalListener extends MicroBaseListener {
         tokens.add(node.getSymbol().getText());
 
     }
-    // This Method writes the treminals the listener havs visited to an output
+    // This Method writes the terminals the listener has visited to an output
     //
     public void output_terminals(){
         File output = new File
@@ -43,13 +46,13 @@ public static void main(String[] args){
             //Create a Parser
             MicroParser parser = new MicroParser(tokens);
             ParseTree tree = parser.compilationUnit();
-            //Craete a walker object to traverse the arse tree
+            //Create a walker object to traverse the arse tree
             ParseTreeWalker walker = new ParseTreeWalker();
-            //Craete a treminal listner to collect the non-treminals in the niput file
+            //Create a treminal listener to collect the non-terminals in the niput file
             TerminalListener listener = new TerminalListener();
             //Traverse the tree
             walker.walk(listener, tree);
-            //Craete output file for terminals
+            //Create output file for terminals
             listener.output_terminals();
             input.close();
         }
