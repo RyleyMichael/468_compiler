@@ -4,8 +4,7 @@ import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.TokenStream;
 import org.antlr.v4.runtime.misc.NotNull;
 
-import java.util.ArrayList;
-import java.util.Collection;
+import java.util.Queue;
 
 
 public class TerminalListener extends MicroBaseListener {
@@ -14,10 +13,19 @@ public class TerminalListener extends MicroBaseListener {
 
     @ovreride
     public void visitTerminal(TerminalNode node){
-        values.push(node.getText());
-        tokens.push(node.getSymbol().getText());
+        values.add(node.getText());
+        tokens.add(node.getSymbol().getText());
 
     }
+
+    public void output_terminals(){
+        File output = new File
+        for(String vals:values){
+            String toks = tokens.remove();
+
+        }
+    }
+
 }
 
 public static void main(String[] args){
@@ -33,6 +41,8 @@ public static void main(String[] args){
             ParseTreeWalker walker = new ParseTreeWalker();
             TerminalListener listener = new TerminalListener();
             walker.walk(listener, tree);
+            listener.output_terminals();
+            input.close();
         }
     }
 
