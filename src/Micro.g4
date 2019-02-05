@@ -3,59 +3,60 @@ grammar Micro;
 //Program
 
 program
-	: program_kwd id begin pgm_body end
+	: program_kwd id '\n' begin pgm_body WS end
 	;
 	
 program_kwd
-	: 'PROGRAM'
+	: 'PROGRAM' singlespace*
 	;
 	
 id
-	: IDENTIFIER
+	: IDENTIFIER singlespace*
 	;
 	
 pgm_body
-	: decl func_declarations
+	: decl empty ('FUNCTION')* func_declarations
 	;
 	
 decl
-	: string_decl decl 
-	| var_decl decl 
+	: string_decl singlespace* decl
+	| var_decl singlespace* decl
 	| empty
 	;
 
 string_decl
-	: string_kwd id assign_op STRINGLITERAL
+	: string_kwd id assign_op STRINGLITERAL semicolon
 	;
 	
 string_kwd
-	: 'STRING'
+	: 'STRING' singlespace*
 	;
 
 
 //Variable declaration
 	
 var_decl
-	:  var_type id_list
+	:  var_type id_list singlespace* semicolon
 	;
 	
 var_type
-	: 'FLOAT' 
-	| 'INT'
+	: 'FLOAT' singlespace*
+	| 'INT' singlespace*
 	;
 
 any_type
-	: var_type 
-	| 'VOID'
+	: var_type singlespace*
+	| 'VOID' singlespace*
 	;
 
 id_list
-	: id id_tail
+	: id singlespace* id_tail
+	| singlespace*
 	;
 	
 id_tail
-	: comma id id_tail
-	| empty
+	: comma singlespace* id id_tail
+	| (empty | WS* empty | empty WS*)
 	;
 	
 //Function parameter list
@@ -82,19 +83,19 @@ func_declarations
 	;
 	
 func_decl
-	: function any_type id obr id_list cbr begin func_body end
+	: function singlespace* any_type id obr id_list cbr begin func_body end
 	;
 	
 begin
-	: 'BEGIN'
+	: 'BEGIN' (WS | empty)
 	;
 	
 end
-	: 'END'
+	: 'END' (WS | empty)
 	;
 	
 function
-	: 'FUNCTION'
+	: 'FUNCTION' singlespace*
 	;
 	
 func_body
@@ -125,7 +126,7 @@ base_stmt
 //Basic Statements
 
 assign_stmt
-	: assign_expr semicolon
+	: assign_expr semicolon empty
 	;
 	
 assign_expr
@@ -133,33 +134,37 @@ assign_expr
 	;
 	
 read_stmt
-	: read obr id_list cbr semicolon
+	: read singlespace* obr id_list cbr  semicolon empty
 	;
 
+singlespace
+    : ' '
+    ;
+
 write_stmt
-	: write obr id_list cbr semicolon
+	: write obr id_list cbr semicolon empty
 	;
 	
 return_stmt
-	: return_kwd expr semicolon
+	: return_kwd expr semicolon empty
 	;
 	
 read
-	: 'READ'
+	: 'READ' singlespace*
 	;
 
 write
-	: 'WRITE'
+	: 'WRITE' singlespace*
 	;
 
 return_kwd
-	: 'RETURN'
+	: 'RETURN' singlespace*
 	;
 	
 //Expressions
 
 expr
-	: expr_prefix factor
+	: expr_prefix singlespace* factor singlespace*
 	;
 	
 expr_prefix
@@ -168,17 +173,17 @@ expr_prefix
 	;
 
 factor
-	: factor_prefix postfix_expr
+	: factor_prefix singlespace* postfix_expr
 	;
 	
 factor_prefix
-	: factor_prefix postfix_expr mulop
+	: factor_prefix singlespace* postfix_expr singlespace* mulop
 	| empty
 	;
 	
 postfix_expr
-	: primary
-	| call_expr
+	: primary singlespace*
+	| call_expr singlespace*
 	;
 	
 call_expr
@@ -228,28 +233,28 @@ cond
 	;
 	
 if_kwd
-	: 'IF'
+	: 'IF' singlespace*
 	;
 	
 else_kwd
-	: 'ELSE'
+	: 'ELSE' singlespace*
 	;
 
 endif
-	: 'ENDIF'
+	: 'ENDIF' singlespace*
 	;
 	
 compop
-	: '<'
-	| '>'
-	| '='
-	| '!='
-	| '<='
-	| '>='
+	: singlespace* '<' singlespace*
+	| singlespace* '>' singlespace*
+	| singlespace* '=' singlespace*
+	| singlespace* '!=' singlespace*
+	| singlespace* '<=' singlespace*
+	| singlespace* '>=' singlespace*
 	;
 	
 assign_op
-	: ':='
+	: singlespace* ':=' singlespace*
 	;
 	
 //While statements
@@ -262,41 +267,42 @@ comma
 	;
 	
 while_kwd
-	: 'WHILE'
+	: 'WHILE' singlespace*
 	;
 	
 endwhile
-	: 'ENDWHILE'
+	: 'ENDWHILE' singlespace*
 	;
 	
 continue_kwd
-	: 'CONTINUE'
+	: 'CONTINUE' singlespace*
 	;
 	
 break_kwd
-	: 'BREAK'
+	: 'BREAK' singlespace*
 	;
 
 obr
-	: '('
+	: '(' singlespace*
 	;
 	
 cbr
-	: ')'
+	:  singlespace* ')'
 	;
 	
 semicolon
-	: ';'
+	: ';' (WS | COMMENT)*
 	;
 
 empty
-    :
+    : (COMMENT | WS)*
+    |
     ;
 	
 //Literals
 
 WS
-    :   (' ' | '\t' | '\r'| '\n') -> skip
+    :   (' ' | '\t' | '\r'| '\n')* -> skip
     ;
 
 KEYWORD
@@ -353,9 +359,9 @@ FLOATLITERAL
 	;
 	
 STRINGLITERAL
-	: ('"' .* '"')
+	: '"' ~('"')* '"'
 	;
 	
 COMMENT
-	: ('--' .* '\n')
+	: ('--' ~('\n')* '\n')
 	;

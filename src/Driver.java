@@ -11,9 +11,9 @@ import java.lang.String;
 class Driver{
     public static void main(String[]args){
         try {
-            for (String s : args) {
+            //for (String s : args) {
                 //Open input files
-                File input = new File(s);
+                File input = new File("./src/nested.micro");
                 //Convert the input file to string
                 Scanner scanner = new Scanner(input).useDelimiter("\\A");
                 String result = scanner.hasNext() ? scanner.next() : "";
@@ -30,11 +30,11 @@ class Driver{
                 //Traverse the tree
                 walker.walk(listener, tree);
                 //Create output file for terminals
-                listener.output_terminals(s);
-            }
+                listener.output_terminals("name");
+            //}
         }
         catch(Exception e){
-            System.out.println("\n Ab error occured");
+            System.out.println("\n Ab error occured" + e.getMessage());
         }
     }
 }

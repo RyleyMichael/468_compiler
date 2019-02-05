@@ -19,7 +19,7 @@ public class TerminalListener extends MicroBaseListener {
     // This Method writes the terminals the listener has visited to an output
     //
     public void output_terminals(String filename){
-        File output = new File(filename);
+        //File output = new File(filename);
         for(String vals:values){
             String toks = tokens.remove();
             System.out.println("\n Tokens = " + toks + "\n Vals = " + vals);
