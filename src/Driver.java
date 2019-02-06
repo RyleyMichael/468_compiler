@@ -37,7 +37,7 @@ class Driver{
             }
         }
         catch(Exception e){
-            System.out.println("\n Ab error occured\n" + e.getMessage() + "\n" +e.fillInStackTrace());
+            System.out.println("\n An error occured\n" + e.getMessage() + "\n" +e.fillInStackTrace());
         }
     }
 }

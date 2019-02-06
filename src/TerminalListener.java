@@ -35,7 +35,7 @@ public class TerminalListener extends MicroBaseListener {
         FileWriter fileWriter = new FileWriter(output_flie);
         for(String vals:values){
             String toks = tokens.remove();
-            fileWriter.write("\n Tokens = " + toks + "\n Vals = " + vals);
+            fileWriter.write("\n Token Type = " + toks + "\n Value = " + vals);
 
         }
         fileWriter.close();
