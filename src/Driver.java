@@ -13,7 +13,7 @@ class Driver{
     public static void main(String[]args){
         try {
             for (String s : args) {
-                String filename = "./src/nested.micro";
+                String filename = s;
                 File input = new File(filename);
                 //Convert the input file to string
                 Scanner scanner = new Scanner(input).useDelimiter("\\A");
