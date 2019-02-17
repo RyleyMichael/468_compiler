@@ -15,6 +15,8 @@ public class TerminalListener extends MicroBaseListener {
     private Queue<String> tokens = new LinkedList<String>();
     private Queue<String> values = new LinkedList<String>();
     private Vocabulary v;
+    private boolean error = false;
+    String state;
 
     public TerminalListener(Vocabulary v){
         this.v = v;
@@ -27,6 +29,14 @@ public class TerminalListener extends MicroBaseListener {
 
 
     }
+
+    @Override
+    public void visitErrorNode(ErrorNode node){
+        error = true;
+
+    }
+
+
     // This Method writes the terminals the listener has visited to an output
     //
     public void output_terminals(String filename) throws IOException {
@@ -40,6 +50,20 @@ public class TerminalListener extends MicroBaseListener {
         }
         fileWriter.close();
 
+    }
+
+    public void output_end_state(String filename) throws IOException{
+        int length = filename.length()-5;
+        String output_flie = (filename.substring(0,length))+"out";
+        FileWriter fileWriter = new FileWriter(output_flie);
+        if (error==true){
+            state = "Not accepted";
+        }
+        else{
+            state = "Accepted";
+        }
+        fileWriter.write(state);
+        fileWriter.close();
     }
 
 }
