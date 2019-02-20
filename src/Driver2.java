@@ -11,8 +11,9 @@ import java.lang.String;
 
 class Driver2{
     public static void main(String[]args){
+        String[] filenames = {"test1.micro", "test2.micro", "test3.micro", "test4.micro", "test5.micro", "test6.micro", "test7.micro", "test8.micro", "test9.micro", "test10.micro", "test12.micro", "test15.micro", "test16.micro", "test17.micro", "test18.micro", "test19.micro", "test20.micro", "test21.micro"};
         try {
-            for (String s : args) {
+            for (String s : filenames) {
                 String filename = s;
                 File input = new File(filename);
                 //Convert the input file to string
@@ -24,6 +25,8 @@ class Driver2{
                 CommonTokenStream tokens = new CommonTokenStream(lexer);
                 //Create a Parser
                 MicroParser parser = new MicroParser(tokens);
+                Error_Listener el = new Error_Listener();
+                parser.addErrorListener(el);
                 RuleContext tree = parser.program();
                 // Create a walker object to traverse the arse tree
                 ParseTreeWalker walker = new ParseTreeWalker();
@@ -32,8 +35,9 @@ class Driver2{
                 //Traverse the tree
                 walker.walk(listener, tree);
 
+                boolean err = el.has_error();
                 //Create output file for terminals
-                listener.output_terminals(filename);
+                listener.output_end_state(filename, err);
             }
         }
         catch(Exception e){
@@ -41,5 +45,7 @@ class Driver2{
         }
     }
 }
+
+
 
 

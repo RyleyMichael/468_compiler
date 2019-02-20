@@ -32,7 +32,7 @@ public class TerminalListener extends MicroBaseListener {
 
     @Override
     public void visitErrorNode(ErrorNode node){
-        error = true;
+        this.error = true;
 
     }
 
@@ -52,15 +52,15 @@ public class TerminalListener extends MicroBaseListener {
 
     }
 
-    public void output_end_state(String filename) throws IOException{
+    public void output_end_state(String filename, boolean err) throws IOException{
         int length = filename.length()-5;
         String output_flie = (filename.substring(0,length))+"out";
         FileWriter fileWriter = new FileWriter(output_flie);
-        if (error==true){
-            state = "Not accepted";
-        }
-        else{
+        if (this.error==false && err==false){
             state = "Accepted";
+        }
+        else {
+            state = "Not accepted";
         }
         fileWriter.write(state);
         fileWriter.close();
