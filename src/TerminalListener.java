@@ -25,7 +25,8 @@ public class TerminalListener extends MicroBaseListener {
     public void visitTerminal(TerminalNode node){
 
         values.add(node.getText());
-        tokens.add( " " + v.getSymbolicName(node.getSymbol().getType()));
+        //tokens.add( " " + v.getSymbolicName(node.getSymbol().getType()));
+        tokens.add(v.getSymbolicName(node.getSymbol().getType()));
 
 
     }
@@ -45,11 +46,9 @@ public class TerminalListener extends MicroBaseListener {
         FileWriter fileWriter = new FileWriter(output_flie);
         for(String vals:values){
             String toks = tokens.remove();
-            fileWriter.write("\n Token Type = " + toks + "\n Value = " + vals);
-
+            fileWriter.write("Token Type: " + toks + "\nValue: " + vals + "\n");
         }
         fileWriter.close();
-
     }
 
     public void output_end_state(String filename, boolean err) throws IOException{
