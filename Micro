@@ -1,0 +1,6 @@
+#!/bin/bash
+
+java -Xmx500M org.antlr.v4.Tool Micro.g4
+javac Driver.java
+filename=$1
+java Driver $filename
