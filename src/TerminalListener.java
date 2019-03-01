@@ -60,17 +60,23 @@ public class TerminalListener extends MicroBaseListener {
     }
 
     public void output_end_state(String filename, boolean err) throws IOException{
+        /*
         int length = filename.length()-5;
         String output_flie = (filename.substring(0,length))+"out";
         FileWriter fileWriter = new FileWriter(output_flie);
+        */
+        
         if (this.error==false && err==false){
             state = "Accepted";
         }
         else {
             state = "Not accepted";
         }
+        System.out.println(state);
+        /*
         fileWriter.write(state);
         fileWriter.close();
+        */
     }
 
 }
