@@ -41,6 +41,13 @@ public class TerminalListener extends MicroBaseListener {
     // This Method writes the terminals the listener has visited to an output
     //
     public void output_terminals(String filename) throws IOException {
+        
+        for(String vals:values){
+            String toks = tokens.remove();
+            System.out.println("Token Type: " + toks + "\nValue: " + vals);
+        }
+        
+        /*
         int length = filename.length()-5;
         String output_flie = (filename.substring(0,length))+"out";
         FileWriter fileWriter = new FileWriter(output_flie);
@@ -49,6 +56,7 @@ public class TerminalListener extends MicroBaseListener {
             fileWriter.write("Token Type: " + toks + "\nValue: " + vals + "\n");
         }
         fileWriter.close();
+        */
     }
 
     public void output_end_state(String filename, boolean err) throws IOException{
