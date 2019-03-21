@@ -1,4 +1,4 @@
-//LITTLE grammar
+//Micro grammar
 grammar Micro;
 
 //KEYWORDS
@@ -36,12 +36,13 @@ decl              :string_decl decl | var_decl decl | empty;
 empty             :();
 
 /* Global String Declaration */
-string_decl       :'STRING' id ':=' str';';
+string_decl       :'STRING' id ':=' str end_decl;
 str               :STRINGLITERAL;
 
 /* Variable Declaration */
-var_decl          :var_type id_list';';
-var_type          :'FLOAT' | 'INT' | 'STRING';
+var_decl          :var_type id_list end_decl;
+end_decl          :';';
+var_type          :'FLOAT' | 'INT';
 any_type          :var_type | 'VOID';
 id_list           :id id_tail;
 id_tail           :',' id id_tail | empty;
@@ -77,13 +78,13 @@ postfix_expr      :primary | call_expr;
 call_expr         :id '(' expr_list ')';
 expr_list         :expr expr_list_tail | empty;
 expr_list_tail    :',' expr expr_list_tail | empty;
-primary           : id | INTLITERAL | FLOATLITERAL | '(' expr ')' ;
+primary           :'(' expr ')' | id | INTLITERAL | FLOATLITERAL;
 addop             :'+' | '-';
 mulop             : '*' | '/';
 
 /* Complex Statements and Condition */
-if_stmt           :'IF' '(' cond ')' decl stmt_list else_part 'ENDIF';
-else_part         : 'ELSE' decl stmt_list | empty;
+if_stmt           :'IF' '(' cond ')' decl stmt_list (else_part| empty) 'ENDIF';
+else_part         : 'ELSE' decl stmt_list;
 cond              :expr compop expr;
 compop            :'<' | '>' | '=' | '!=' | '<=' | '>=';
 
