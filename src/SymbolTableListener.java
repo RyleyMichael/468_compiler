@@ -39,12 +39,24 @@ public class SymbolTableListener extends MicroBaseListener {
 
     public void print_symbtab(){
         for(String scope : symb_tab.keySet()){
-            System.out.println(scope);
+            System.out.println(String.format("Symbol table %s", scope));
             LinkedHashMap table = symb_tab.get(scope);
-            System.out.println(table + "\n\n");
-        }
+            for( Object var_name : table.keySet()){
+                ArrayList<String> temp =(ArrayList<String>) table.get(var_name);
+                if(temp.size()>1){
+                    System.out.println(String.format("\nname  %s type %s value %s",var_name, temp.get(0), temp.get(1) ));
+                }
+                else{
+                    System.out.println(String.format("\nname  %s type %s",var_name, temp.get(0) ));
+                }
+
+
+                }
+            }
 
     }
+
+
 
 
     /*
