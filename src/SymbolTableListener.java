@@ -15,13 +15,17 @@ import org.antlr.v4.runtime.tree.*;
 *
 *
 * This class uses a stack to keep track of the current scope.
-* Whenever the listener enters a rule which would change the scope (such as entering a while statement),
-* the new scope is updated and pushed onto the stack. Likewise, whenever the listener leaves a while statement,
+* Whenever the listener enters a rule which would change the scope (such as entering a "while statement" or an "if statement"),
+* the new scope is updated and pushed onto the stack. Likewise, whenever the listener leaves a scope,
 * the last scope is popped from the stack and the current scope is updated to the element on the top of the stack
 *
 *
 * Chose linkedhashmaps because this data structure preserves the order in which they keys were initially added to the hashmap
 * This allows for iteration over the symbol tables in the order that the scopes were defined in the source program
+*
+* Chose to use ArrayLists as the values in the inner LinkedHashMap. The entries of the ArrayList represent {variable_type} for INT and FLOATS
+* and {variable_type, value_of_string} for Strings. We chose ArrayLists because in the future we may be interested in representing
+* {variable_type, value_of_int} for INT variables. With ArrayLists that will be easy to do
 * */
 public class SymbolTableListener extends MicroBaseListener {
     private LinkedHashMap<String, LinkedHashMap<String, ArrayList<String>>> symb_tab = new LinkedHashMap<>();
@@ -37,12 +41,20 @@ public class SymbolTableListener extends MicroBaseListener {
         scopes.push(current_scope);
     }
 
+
+    /*
+    * This method prints the symbol tables in the format required for the project
+    * It iterates through the scopes (keys to the outer hashmap) and then for each scope it iterates through all declared variables
+    * We used LinkedHashMaps as opposed to regular hashtables because it is much easier to iterate over the scopes and variables of a program
+    * in the order they were declared using LinkedHashMaps with our parser
+    * */
     public void print_symbtab(){
         for(String scope : symb_tab.keySet()){
             System.out.println(String.format("Symbol table %s", scope));
             LinkedHashMap table = symb_tab.get(scope);
             for( Object var_name : table.keySet()){
                 ArrayList<String> temp =(ArrayList<String>) table.get(var_name);
+                //Currently only the ArrayLists for STRING variables have more than one entry {vartpye, string_value}
                 if(temp.size()>1){
                     System.out.println(String.format("\nname  %s type %s value %s",var_name, temp.get(0), temp.get(1) ));
                 }
