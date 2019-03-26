@@ -8,10 +8,12 @@ import java.io.File;
 import java.util.Scanner;
 
 public class Driver3 {
+
     public static void main(String[]args){
+
         try {
             //for (String s : args) {
-                String filename = "test20.micro.txt";
+                String filename = "test9.micro";
                 File input = new File(filename);
                 //Convert the input file to string
                 Scanner scanner = new Scanner(input).useDelimiter("\\A");

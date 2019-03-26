@@ -30,10 +30,15 @@ import org.antlr.v4.runtime.tree.*;
 public class SymbolTableListener extends MicroBaseListener {
     private LinkedHashMap<String, LinkedHashMap<String, ArrayList<String>>> symb_tab = new LinkedHashMap<>();
     private Stack<String> scopes;
+    private ArrayList<String> errors = new ArrayList<>();
     String current_scope = "Global";
     private int next_block = 1;
     private Vocabulary v;
     String state;
+
+
+
+
 
     public SymbolTableListener(Vocabulary v){
         this.v = v;
@@ -49,27 +54,42 @@ public class SymbolTableListener extends MicroBaseListener {
     * in the order they were declared using LinkedHashMaps with our parser
     * */
     public void print_symbtab(){
-        for(String scope : symb_tab.keySet()){
-            System.out.println(String.format("Symbol table %s", scope));
-            LinkedHashMap table = symb_tab.get(scope);
-            for( Object var_name : table.keySet()){
-                ArrayList<String> temp =(ArrayList<String>) table.get(var_name);
-                //Currently only the ArrayLists for STRING variables have more than one entry {vartpye, string_value}
-                if(temp.size()>1){
-                    System.out.println(String.format("\nname  %s type %s value %s",var_name, temp.get(0), temp.get(1) ));
-                }
-                else{
-                    System.out.println(String.format("\nname  %s type %s",var_name, temp.get(0) ));
-                }
+        if (errors.size()<1) {
+            for (String scope : symb_tab.keySet()) {
+                System.out.println(String.format("Symbol table %s", scope));
+                LinkedHashMap table = symb_tab.get(scope);
+                for (Object var_name : table.keySet()) {
+                    ArrayList<String> temp = (ArrayList<String>) table.get(var_name);
+                    //Currently only the ArrayLists for STRING variables have more than one entry {vartpye, string_value}
+                    if (temp.size() > 1) {
+                        System.out.println(String.format("\nname  %s type %s value %s", var_name, temp.get(0), temp.get(1)));
+                    } else {
+                        System.out.println(String.format("\nname  %s type %s", var_name, temp.get(0)));
+                    }
 
 
                 }
             }
-
+        }
+        else{
+            System.out.println(errors.get(0));
+            }
     }
 
 
 
+    /*
+     *
+     * XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+     *                       Error handling
+     * XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+     *
+     *
+     */
+
+    public void log_error(String message){
+        errors.add(message);
+    }
 
     /*
      *
@@ -89,36 +109,50 @@ public class SymbolTableListener extends MicroBaseListener {
         String id_list = ctx.getChild(1).getText();
         String [] ids = id_list.split(",");
         for(String s : ids){
-            ArrayList<String> temp = new ArrayList<>();
-            temp.add(vtype);
-            declarations.put(s, temp);
+            if(declarations.containsKey(s)){
+                log_error(String.format("DECLARATION ERROR %s", s));
+            }
+            else {
+                ArrayList<String> temp = new ArrayList<>();
+                temp.add(vtype);
+                declarations.put(s, temp);
+            }
         }
         symb_tab.put(current_scope, declarations);
 
     }
 
-    @Override public void exitParam_decl(MicroParser.Param_declContext ctx) {
+    @Override public void exitParam_decl(MicroParser.Param_declContext ctx){
         LinkedHashMap declarations = symb_tab.get(current_scope);
         String vtype = ctx.getChild(0).getText();
         String id = ctx.getChild(1).getText();
-        ArrayList<String> temp = new ArrayList<>();
-        temp.add(vtype);
-        declarations.put(id, temp);
-        symb_tab.put(current_scope, declarations);
+        if(declarations.containsKey(id)){
+            log_error(String.format("DECLARATION ERROR %s", id));
+        }
+        else {
+            ArrayList<String> temp = new ArrayList<>();
+            temp.add(vtype);
+            declarations.put(id, temp);
+            symb_tab.put(current_scope, declarations);
+        }
     }
 
 
-    @Override public void exitString_decl(MicroParser.String_declContext ctx) {
+    @Override public void exitString_decl(MicroParser.String_declContext ctx){
         LinkedHashMap declarations = symb_tab.get(current_scope);
         String vtype = ctx.getChild(0).getText();
         String id = ctx.getChild(1).getText();
         String value_of = ctx.getChild(3).getText();
-        ArrayList<String> temp = new ArrayList<>();
-        temp.add(vtype);
-        temp.add(value_of);
-        declarations.put(id, temp);
-        symb_tab.put(current_scope, declarations);
-
+        if(declarations.containsKey(id)){
+            log_error(String.format("DECLARATION ERROR %s", id));
+        }
+        else {
+            ArrayList<String> temp = new ArrayList<>();
+            temp.add(vtype);
+            temp.add(value_of);
+            declarations.put(id, temp);
+            symb_tab.put(current_scope, declarations);
+        }
 
     }
 
