@@ -90,7 +90,66 @@ public class Code_Generator extends SymbolTableListener {
         return tempcode;
     }
 
-    @Override public void enterAssign_expr(MicroParser.Assign_exprContext ctx) {
+
+
+
+        @Override public void enterWrite_stmt(MicroParser.Write_stmtContext ctx){
+        String temp = ctx.getChild(2).getText();
+        String[] temp_arr =temp.split(",");
+
+        for(String s :temp_arr){
+
+            String vartype;
+            int rnum;
+
+            if (declared_vars.containsKey(s) && reg_nums.containsKey(s)){
+
+                rnum = reg_nums.get(s);
+                vartype = declared_vars.get(s).get(0);
+                if (vartype.equals("INT")){vartype="i";}
+                else if(vartype.equals("FLOAT")){vartype="r";}
+                this.generated_code+=String.format("sys write%s r%d\n", vartype, rnum);
+            }
+            else{
+                vartype="s";
+                this.generated_code+=String.format("sys write%s %s\n", vartype, s);
+
+            }
+
+
+        }
+    }
+
+    @Override public void enterRead_stmt(MicroParser.Read_stmtContext ctx){
+        String temp = ctx.getChild(2).getText();
+        String[] temp_arr =temp.split(",");
+        for(String s :temp_arr){
+
+            String vartype;
+            int rnum;
+            vartype = declared_vars.get(s).get(0);
+
+            if (declared_vars.containsKey(s)){
+                if(reg_nums.containsKey(s)){rnum = reg_nums.get(s);}
+                else{
+                    register_iterator+=1;
+                    rnum = register_iterator;
+                    reg_nums.put(s, rnum);
+                }
+                vartype = declared_vars.get(s).get(0);
+                if (vartype.equals("INT")){vartype="i";}
+                else if(vartype.equals("FLOAT")){vartype="r";}
+                else{vartype="s";}
+                this.generated_code+=String.format("sys read%s %s\n", vartype, s);
+                this.generated_code+=String.format("move %s r%d\n", s, rnum);}
+
+        }
+
+        }
+
+
+
+        @Override public void enterAssign_expr(MicroParser.Assign_exprContext ctx) {
 
         int register;
         if(reg_nums.containsKey(ctx.getChild(0).getText())){
