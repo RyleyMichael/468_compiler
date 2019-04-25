@@ -72,13 +72,15 @@ return_stmt       :'RETURN' expr ';';
 /* Expressions */
 expr              :expr_prefix factor;
 expr_prefix       :expr_prefix factor addop | empty;
+call_expr         :id '(' expr_list ')';
 factor            :factor_prefix postfix_expr;
 factor_prefix     :factor_prefix postfix_expr mulop | empty;
-postfix_expr      :primary | call_expr;
-call_expr         :id '(' expr_list ')';
+postfix_expr      :primary | cmpnd_expr | call_expr;
+
 expr_list         :expr expr_list_tail | empty;
 expr_list_tail    :',' expr expr_list_tail | empty;
-primary           :'(' expr ')' | id | INTLITERAL | FLOATLITERAL;
+cmpnd_expr        : '(' expr ')';
+primary           :  id | INTLITERAL | FLOATLITERAL;
 addop             :'+' | '-';
 mulop             : '*' | '/';
 
