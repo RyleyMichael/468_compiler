@@ -12,7 +12,7 @@ public class Driver4 {
 
         try {
             //for (String s : args) {
-            String filename = "test_mult.micro";
+            String filename = "test_adv.micro";
             File input = new File(filename);
 
             //Convert the input file to string

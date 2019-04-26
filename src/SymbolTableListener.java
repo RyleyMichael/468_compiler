@@ -28,13 +28,15 @@ import org.antlr.v4.runtime.tree.*;
 * {variable_type, value_of_int} for INT variables. With ArrayLists that will be easy to do
 * */
 public class SymbolTableListener extends MicroBaseListener {
-    private LinkedHashMap<String, LinkedHashMap<String, ArrayList<String>>> symb_tab = new LinkedHashMap<>();
-    private Stack<String> scopes;
-    private ArrayList<String> errors = new ArrayList<>();
-    String current_scope = "Global";
-    private int next_block = 1;
-    private Vocabulary v;
-    String state;
+    protected LinkedHashMap<String, LinkedHashMap<String, ArrayList<String>>> symb_tab = new LinkedHashMap<>();
+    protected Stack<String> scopes;
+    protected ArrayList<String> errors = new ArrayList<>();
+    protected String current_scope = "Global";
+    protected LinkedHashMap<String, ArrayList<String>> declared_vars = new LinkedHashMap<>();
+    protected int next_block = 1;
+    protected Vocabulary v;
+    protected String state;
+    private String generated_code = "";
 
 
 
@@ -116,6 +118,7 @@ public class SymbolTableListener extends MicroBaseListener {
                 ArrayList<String> temp = new ArrayList<>();
                 temp.add(vtype);
                 declarations.put(s, temp);
+                declared_vars.put(s,temp);
             }
         }
         symb_tab.put(current_scope, declarations);
@@ -133,6 +136,7 @@ public class SymbolTableListener extends MicroBaseListener {
             ArrayList<String> temp = new ArrayList<>();
             temp.add(vtype);
             declarations.put(id, temp);
+            declared_vars.put(id,temp);
             symb_tab.put(current_scope, declarations);
         }
     }
@@ -151,6 +155,8 @@ public class SymbolTableListener extends MicroBaseListener {
             temp.add(vtype);
             temp.add(value_of);
             declarations.put(id, temp);
+            declared_vars.put(id,temp);
+
             symb_tab.put(current_scope, declarations);
         }
 
@@ -171,6 +177,10 @@ public class SymbolTableListener extends MicroBaseListener {
     public void enterProgram(MicroParser.ProgramContext ctx) {
         symb_tab.put(current_scope, new LinkedHashMap<>());
     }
+    public void exitProgram(MicroParser.ProgramContext ctx) {
+        symb_tab.put(current_scope, new LinkedHashMap<>());
+    }
+
     @Override public void enterFunc_decl(MicroParser.Func_declContext ctx) {
         String blockname = ctx.getChild(2).getText();
         current_scope = blockname;
@@ -188,6 +198,7 @@ public class SymbolTableListener extends MicroBaseListener {
         current_scope = blockname;
         scopes.push(blockname);
         symb_tab.put(current_scope, new LinkedHashMap<>());
+
     }
 
     @Override public void exitWhile_stmt(MicroParser.While_stmtContext ctx) {

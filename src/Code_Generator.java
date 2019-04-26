@@ -19,6 +19,7 @@ public class Code_Generator extends SymbolTableListener {
         String var_assigned = null;
         Stack<String> out_labels = new Stack<>();
         Stack<String> cmp_statements = new Stack<>();
+        Stack<String> else_blocks = new Stack<>();
 
         public Expressions(){
 
@@ -51,17 +52,17 @@ public class Code_Generator extends SymbolTableListener {
     public String compare_stmt(int r1, int r2, String vtype, String op, String target){
         String tempcode = String.format("cmp%s r%d r%d\n", vtype, r1, r2);
         switch(op){
-            case "<=": tempcode += String.format("jle %s\n", target);
+            case "<=": tempcode += String.format("jle %s", target);
                         break;
-            case "==": tempcode += String.format("jeq %s\n", target);
+            case "==": tempcode += String.format("jeq %s", target);
                     break;
-            case "!=": tempcode += String.format("jne %s\n", target);
+            case "!=": tempcode += String.format("jne %s", target);
                 break;
-            case ">=": tempcode += String.format("jge %s\n", target);
+            case ">=": tempcode += String.format("jge %s", target);
                 break;
-            case "<": tempcode += String.format("jlt %s\n", target);
+            case "<": tempcode += String.format("jlt %s", target);
                 break;
-            case ">": tempcode += String.format("jgt %s\n", target);
+            case ">": tempcode += String.format("jgt %s", target);
                 break;
 
             default: tempcode+="";
@@ -72,17 +73,17 @@ public class Code_Generator extends SymbolTableListener {
     public String compare_stmt_inv(int r1, int r2, String vtype, String op, String target){
         String tempcode = String.format("cmp%s r%d r%d\n", vtype, r1, r2);
         switch(op){
-            case "<=": tempcode += String.format("jgt %s\n", target);
+            case "<=": tempcode += String.format("jgt %s", target);
                 break;
-            case "==": tempcode += String.format("jne %s\n", target);
+            case "==": tempcode += String.format("jne %s", target);
                 break;
-            case "!=": tempcode += String.format("jeq %s\n", target);
+            case "!=": tempcode += String.format("jeq %s", target);
                 break;
-            case ">=": tempcode += String.format("jlt %s\n", target);
+            case ">=": tempcode += String.format("jlt %s", target);
                 break;
-            case "<": tempcode += String.format("jge %s\n", target);
+            case "<": tempcode += String.format("jge %s", target);
                 break;
-            case ">": tempcode += String.format("jle %s\n", target);
+            case ">": tempcode += String.format("jle %s", target);
                 break;
 
             default: tempcode+="";
@@ -183,22 +184,85 @@ public class Code_Generator extends SymbolTableListener {
     }
 
 
-    @Override public void enterWhile_stmt(MicroParser.While_stmtContext ctx) {
-
+    @Override public void enterIf_stmt(MicroParser.If_stmtContext ctx) {
         String blockname = String.format("BLOCK %d", next_block);
         next_block += 1;
         current_scope = blockname;
         scopes.push(blockname);
-
         symb_tab.put(current_scope, new LinkedHashMap<>());
+
         String target = String.format("label%d\n",label_iterator);
         String out_label = String.format("out%d\n",label_iterator);
         current_exp.in_labels.push(target);
         current_exp.out_labels.push(out_label);
-        this.generated_code += "label "+target;
         label_iterator+=1;
 
+        String vartype = declared_vars.get(ctx.getChild(2).getChild(0).getText()).get(0);
+        if (vartype.equals("INT")){vartype ="i";}
+        else{vartype ="r";}
+        String op = ctx.getChild(2).getChild(1).getText();
+        int r1;
+        int r2;
+        if(!reg_nums.containsKey(ctx.getChild(2).getChild(0).getText())){
+            String temp = ctx.getChild(2).getChild(0).getText();
+            register_iterator+=1;
+            reg_nums.put(temp, register_iterator);
+            r1 = register_iterator;
+            reg_nums.put(temp, register_iterator);
+            this.generated_code+= String.format("move %s r%d\n", temp, register_iterator);
+        }
+        else{
+            r1 = reg_nums.get(ctx.getChild(2).getChild(0).getText());
+        }
+        if(reg_nums.containsKey(ctx.getChild(2).getChild(2).getText())){
+            r2 = reg_nums.get(ctx.getChild(2).getChild(2).getText());
+        }
+        else{
+            register_iterator+=1;
+            r2 = register_iterator;
+            String temp =ctx.getChild(2).getChild(2).getText();
+            reg_nums.put(temp, register_iterator);
+            this.generated_code+= String.format("move %s r%d\n", temp, register_iterator);
+
+        }
+        this.generated_code+= compare_stmt_inv(r1, r2, vartype, op, current_exp.out_labels.peek());
+        this.generated_code += "label "+target;
+
+
     }
+
+    @Override public void exitIf_stmt(MicroParser.If_stmtContext ctx) {
+        this.generated_code+= String.format("label %s", current_exp.out_labels.pop());
+    }
+
+    @Override public void enterWhile_stmt(MicroParser.While_stmtContext ctx) {
+
+        enter_conditional();
+
+    }
+
+    @Override public void enterElse_part(MicroParser.Else_partContext ctx) {
+        String blockname = String.format("BLOCK %d", next_block);
+        next_block += 1;
+        current_scope = blockname;
+        scopes.push(current_scope);
+        symb_tab.put(current_scope, new LinkedHashMap<>());
+        enter_conditional();
+
+
+
+    }
+
+    @Override public void exitElse_part(MicroParser.Else_partContext ctx) {
+        scopes.pop();
+        current_scope = scopes.peek();
+        this.generated_code+= String.format("label %s", current_exp.out_labels.pop());
+
+
+    }
+
+
+
 
     @Override public void exitWhile_stmt(MicroParser.While_stmtContext ctx) {
         int r1 = reg_nums.get(ctx.getChild(2).getChild(0).getText());
@@ -216,19 +280,35 @@ public class Code_Generator extends SymbolTableListener {
             register_iterator+=1;
             r2 = register_iterator;
             reg_nums.put(ctx.getChild(2).getChild(2).getText(), register_iterator);
-
+            this.generated_code+= String.format("move %s r%d\n",ctx.getChild(2).getChild(2).getText(), register_iterator );
         }
         this.generated_code+= compare_stmt_inv(r1, r2, vartype, op, current_exp.out_labels.peek());
+        this.generated_code+= String.format("jmp %s", current_exp.in_labels.peek());
         current_exp.cmp_statements.push(compare_stmt(r1, r2, vartype, op, current_exp.in_labels.pop()));
 
 
 
         String cmp_stmt = current_exp.cmp_statements.pop();
         this.generated_code+= cmp_stmt;
-        this.generated_code+="label"+current_exp.out_labels.pop();
+        this.generated_code+="label "+current_exp.out_labels.pop();
         scopes.pop();
         current_scope = scopes.peek();
 
+    }
+
+    private void enter_conditional() {
+        String blockname = String.format("BLOCK %d", next_block);
+        next_block += 1;
+        current_scope = blockname;
+        scopes.push(blockname);
+
+        symb_tab.put(current_scope, new LinkedHashMap<>());
+        String target = String.format("label%d\n",label_iterator);
+        String out_label = String.format("out%d\n",label_iterator);
+        current_exp.in_labels.push(target);
+        current_exp.out_labels.push(out_label);
+        this.generated_code += "label "+target;
+        label_iterator+=1;
     }
 
         @Override public void enterExpr(MicroParser.ExprContext ctx) {
