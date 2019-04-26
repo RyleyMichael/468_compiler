@@ -18,6 +18,9 @@ public class TerminalListener extends MicroBaseListener {
     private boolean error = false;
     String state;
 
+
+
+
     public TerminalListener(Vocabulary v){
         this.v = v;
     }
@@ -25,7 +28,7 @@ public class TerminalListener extends MicroBaseListener {
     public void visitTerminal(TerminalNode node){
 
         values.add(node.getText());
-        //tokens.add( " " + v.getSymbolicName(node.getSymbol().getType()));
+
         tokens.add(v.getSymbolicName(node.getSymbol().getType()));
 
 

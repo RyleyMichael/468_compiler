@@ -183,7 +183,6 @@ public class Code_Generator extends SymbolTableListener {
 
     }
 
-
     @Override public void enterIf_stmt(MicroParser.If_stmtContext ctx) {
         String blockname = String.format("BLOCK %d", next_block);
         next_block += 1;
@@ -196,6 +195,10 @@ public class Code_Generator extends SymbolTableListener {
         current_exp.in_labels.push(target);
         current_exp.out_labels.push(out_label);
         label_iterator+=1;
+    }
+
+    @Override public void exitIf_stmt(MicroParser.If_stmtContext ctx) {
+        String target = current_exp.in_labels.pop();
 
         String vartype = declared_vars.get(ctx.getChild(2).getChild(0).getText()).get(0);
         if (vartype.equals("INT")){vartype ="i";}
@@ -217,6 +220,9 @@ public class Code_Generator extends SymbolTableListener {
         if(reg_nums.containsKey(ctx.getChild(2).getChild(2).getText())){
             r2 = reg_nums.get(ctx.getChild(2).getChild(2).getText());
         }
+        else if(ctx.getChild(2).getChild(2).getChildCount()>1) {
+            r2 = ass_root.get_result_register();
+        }
         else{
             register_iterator+=1;
             r2 = register_iterator;
@@ -227,13 +233,12 @@ public class Code_Generator extends SymbolTableListener {
         }
         this.generated_code+= compare_stmt_inv(r1, r2, vartype, op, current_exp.out_labels.peek());
         this.generated_code += "label "+target;
-
-
-    }
-
-    @Override public void exitIf_stmt(MicroParser.If_stmtContext ctx) {
         this.generated_code+= String.format("label %s", current_exp.out_labels.pop());
+
+
     }
+
+
 
     @Override public void enterWhile_stmt(MicroParser.While_stmtContext ctx) {
 
@@ -283,7 +288,7 @@ public class Code_Generator extends SymbolTableListener {
             this.generated_code+= String.format("move %s r%d\n",ctx.getChild(2).getChild(2).getText(), register_iterator );
         }
         this.generated_code+= compare_stmt_inv(r1, r2, vartype, op, current_exp.out_labels.peek());
-        this.generated_code+= String.format("jmp %s", current_exp.in_labels.peek());
+        this.generated_code+= String.format("jmp %s", current_exp.in_labels.get(current_exp.in_labels.size()-1));
         current_exp.cmp_statements.push(compare_stmt(r1, r2, vartype, op, current_exp.in_labels.pop()));
 
 
@@ -291,6 +296,7 @@ public class Code_Generator extends SymbolTableListener {
         String cmp_stmt = current_exp.cmp_statements.pop();
         this.generated_code+= cmp_stmt;
         this.generated_code+="label "+current_exp.out_labels.pop();
+        this.generated_code+= String.format("");
         scopes.pop();
         current_scope = scopes.peek();
 
@@ -324,6 +330,7 @@ public class Code_Generator extends SymbolTableListener {
                 ass_root.setTerm_2(res);
             }
             else{
+                System.out.println("XXXXXXXXXX");
             }
         }
         else{
